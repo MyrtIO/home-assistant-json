@@ -1,21 +1,20 @@
 #pragma once
 
 #include "device.h"
-#include "json_document.h"
 
 namespace HomeAssistant {
 	class Entity {
 	public:
 		const char* name;
 		const char* icon;
-		Device device;
+		Device& device;
 
 		Entity(
 			const char* identifier,
 			const char* name,
 			const char* icon,
 			bool writable,
-			const Device& device
+			Device& device
 		) : name(name),
 			icon(icon),
 			device(device),
@@ -35,24 +34,24 @@ namespace HomeAssistant {
 				json["command_topic"] = commandTopic();
 			}
 			device.fillConfig();
-			fillConfig();
-			return serializeJson(json, buffer);
+			this->fillConfig();
+            return serializeJson(json, buffer);
 		}
 
 		char* id() {
 			if (uniqueID_ == nullptr) {
-				size_t idLen = strlen(device.id) + strlen(idSuffix_) + 2;
+				size_t idLen = strlen(device.id()) + strlen(idSuffix_) + 2;
 				uniqueID_ = (char*)malloc(idLen);
-				snprintf(uniqueID_, idLen, "%s_%s", device.id, idSuffix_);
+				snprintf(uniqueID_, idLen, "%s_%s", device.id(), idSuffix_);
 			}
 			return uniqueID_;
 		}
 
 		char* stateTopic() {
 			if (stateTopic_ == nullptr) {
-				size_t stateTopicLen = strlen(device.mqttNamespace) + strlen(idSuffix_) + 2;
+				size_t stateTopicLen = strlen(device.mqttNamespace()) + strlen(idSuffix_) + 2;
 				stateTopic_ = (char*)malloc(stateTopicLen);
-				snprintf(stateTopic_, stateTopicLen, "%s/%s", device.mqttNamespace, idSuffix_);
+				snprintf(stateTopic_, stateTopicLen, "%s/%s", device.mqttNamespace(), idSuffix_);
 				if (writable_) {
 					stateTopicLen += 5;
 					commandTopic_ = (char*)malloc(stateTopicLen);

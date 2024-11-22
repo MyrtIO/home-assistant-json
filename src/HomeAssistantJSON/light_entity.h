@@ -7,12 +7,12 @@ namespace HomeAssistant {
 	struct LightConfig {
 		const char* name;
 		const char* identifier;
-		const char* icon = nullptr;
-		const char** effects = nullptr;
-		uint16_t effectCount = 0;
-		const bool writable = false;
-		const uint16_t maxMireds = 400;
-		const uint16_t minMireds = 100;
+		const char* icon;
+		const char** effects;
+		uint16_t effectCount;
+		const bool writable;
+		const uint16_t maxMireds;
+		const uint16_t minMireds;
 	};
 
 	struct RGBColor {
@@ -38,8 +38,8 @@ namespace HomeAssistant {
 	class LightEntity: public Entity {
 	public:
 		LightEntity(
-			const LightConfig& config,
-			const Device& device
+			LightConfig config,
+			Device& device
 		) :	config_(config),
 			Entity(
 				config.identifier,
@@ -66,12 +66,12 @@ namespace HomeAssistant {
 			json["min_mireds"] = config_.minMireds;
 			if (config_.effectCount > 0) {
 				json["effect"] = true;
-				auto effects = json.createNestedArray("effect_list");
+				auto effects = json["effect_list"].to<JsonArray>();
 				for (uint16_t i = 0; i < config_.effectCount; i++) {
 					effects.add(config_.effects[i]);
 				}
 			}
-			auto colorModes = json.createNestedArray("supported_color_modes");
+			auto colorModes = json["supported_color_modes"].to<JsonArray>();
 			colorModes.add("color_temp");
 			colorModes.add("rgb");
 		}
